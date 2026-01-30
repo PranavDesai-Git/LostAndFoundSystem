@@ -1,4 +1,4 @@
-package edu.gitam.gelectra;
+package edu.gitam.gelectra.item;
 
 public enum ItemStatus {
     FOUND,

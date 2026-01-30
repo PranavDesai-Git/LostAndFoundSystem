@@ -1,5 +1,6 @@
-package edu.gitam.gelectra;
+package edu.gitam.gelectra.item;
 
+import edu.gitam.gelectra.user.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 

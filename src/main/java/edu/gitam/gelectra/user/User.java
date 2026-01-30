@@ -1,5 +1,6 @@
-package edu.gitam.gelectra;
+package edu.gitam.gelectra.user;
 
+import edu.gitam.gelectra.item.Item;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
