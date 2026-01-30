@@ -8,7 +8,10 @@ public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private long ownerId;
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    private User owner;
     private String itemName;
     private String description;
     @Enumerated(EnumType.STRING)
@@ -23,12 +26,12 @@ public class Item {
         this.id = id;
     }
 
-    public long getOwnerId() {
-        return ownerId;
+    public User getOwner() {
+        return owner;
     }
 
-    public void setOwnerId(long ownerId) {
-        this.ownerId = ownerId;
+    public void setOwner(User owner) {
+        this.owner = owner;
     }
 
     public String getItemName() {
