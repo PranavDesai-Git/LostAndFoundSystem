@@ -1,15 +1,22 @@
 :root {
-  /* Default light mode grey */
+  /* Dashboard specific light grey */
   --bg-dashboard: #e0e0e0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Dark mode grey */
-    --bg-dashboard: #1a1a1a;
-  }
+/* Base reset to ensure the app fills the screen */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
+body, html {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+/* Background animation for Landing and Auth pages */
 @keyframes colorChange {
   0% { background-color: #a34343; }
   50% { background-color: #4b3b52; }
@@ -20,12 +27,27 @@
   width: 100vw;
   height: 100vh;
   animation: colorChange 20s infinite ease-in-out;
-  transition: background-color 0.8s ease-in-out; /* Smooth shift to grey */
-  overflow: hidden;
+  transition: background-color 0.8s ease-in-out;
+  overflow-y: auto; /* Allows scrolling on the dashboard */
   position: relative;
 }
 
+/* Dashboard override - Locked to Light Grey */
 .global-bg-wrapper.dashboard-theme {
-  animation: none;
-  background-color: var(--bg-dashboard);
+  animation: none !important;
+  background-color: var(--bg-dashboard) !important;
+}
+
+/* Scrollbar styling to match the blocky aesthetic */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-dashboard);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #000;
+  border: 3px solid var(--bg-dashboard);
 }
