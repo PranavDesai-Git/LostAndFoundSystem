@@ -1,0 +1,149 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+@keyframes colorChange {
+  0% { background-color: #a34343; }
+  50% { background-color: #4b3b52; }
+  100% { background-color: #a34343; }
+}
+
+@keyframes hintPulse {
+  0% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.1); }
+  100% { opacity: 0.2; transform: scale(1); }
+}
+
+.landing-wrapper {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  animation: colorChange 20s infinite ease-in-out;
+  text-align: center;
+  position: relative;
+  cursor: default;
+}
+
+.custom-cursor {
+  position: fixed;
+  width: 130px;
+  height: 130px;
+  border: 4px solid #000;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.custom-cursor::after {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 4px;
+  background: #000;
+  bottom: -15px;
+  right: -15px;
+  transform: rotate(45deg);
+}
+
+.custom-cursor.active {
+  opacity: 1;
+}
+
+.hero-container {
+  position: relative;
+  user-select: none;
+  padding: 40px;
+  cursor: none;
+  min-height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hint-text {
+  position: absolute;
+  font-family: "Arial Black", sans-serif;
+  font-size: 2rem;
+  color: #000;
+  animation: hintPulse 3s infinite ease-in-out;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.hero-text {
+  font-family: "Arial Black", sans-serif;
+  font-size: clamp(4rem, 15vw, 12rem);
+  font-weight: 900;
+  line-height: 0.8;
+  text-transform: uppercase;
+  letter-spacing: -0.05em;
+  margin-bottom: 3rem;
+  color: #000;
+}
+
+.text-hidden {
+  opacity: 0;
+}
+
+.text-reveal {
+  position: absolute;
+  width: 100%;
+  mask-image: radial-gradient(
+    circle 65px at var(--x) var(--y),
+    black 100%,
+    transparent 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle 65px at var(--x) var(--y),
+    black 100%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.sticky-reveal {
+  opacity: 1 !important;
+  transition: opacity 0.8s ease;
+}
+
+.auth-btn {
+  padding: 18px 45px;
+  font-size: 1.2rem;
+  background: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-family: "Arial Black", sans-serif;
+  text-transform: uppercase;
+  z-index: 10;
+}
+
+.credits-container {
+  position: absolute;
+  bottom: 40px;
+  width: 100%;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.credits-text {
+  font-family: sans-serif;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.8);
+}
