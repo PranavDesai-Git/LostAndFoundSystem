@@ -16,12 +16,12 @@ body, html {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .fade-in {
-  animation: fadeIn 0.4s ease forwards;
+  animation: fadeIn 0.3s ease forwards;
 }
 
 .auth-wrapper {
@@ -30,7 +30,8 @@ body, html {
   display: flex;
   justify-content: center;
   align-items: center;
-  animation: colorChange 20s infinite ease-in-out;
+  animation: none;
+  background: transparent;
   font-family: "Arial Black", sans-serif;
 }
 
@@ -71,28 +72,31 @@ body, html {
   transition: all 0.2s ease;
 }
 
+/* Negative Color Logic */
+.input-error {
+  background-color: #fff; /* White inverts to the exact negative of the BG */
+  border-color: #fff;
+  mix-blend-mode: difference;
+  color: #000; /* This will also invert */
+}
+
+.error-text {
+  mix-blend-mode: difference;
+  color: #fff; /* Inverts to negative of BG */
+  font-size: 0.8rem;
+  margin-bottom: 5px;
+  text-align: left;
+  font-weight: 900;
+}
+
 .input-locked {
   border-color: rgba(0,0,0,0.2);
   color: rgba(0,0,0,0.4);
   cursor: not-allowed;
 }
 
-.auth-input:focus:not(.input-locked) {
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateX(5px);
-}
-
 .social-container {
   display: flex;
   flex-direction: column;
   gap: 10px;
-}
-
-.error-msg {
-  color: #000;
-  font-size: 0.8rem;
-  margin-bottom: 10px;
-  text-align: left;
-  font-weight: 900;
-  text-transform: uppercase;
 }

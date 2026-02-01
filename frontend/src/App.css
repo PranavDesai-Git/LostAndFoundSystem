@@ -1,0 +1,31 @@
+:root {
+  /* Default light mode grey */
+  --bg-dashboard: #e0e0e0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark mode grey */
+    --bg-dashboard: #1a1a1a;
+  }
+}
+
+@keyframes colorChange {
+  0% { background-color: #a34343; }
+  50% { background-color: #4b3b52; }
+  100% { background-color: #a34343; }
+}
+
+.global-bg-wrapper {
+  width: 100vw;
+  height: 100vh;
+  animation: colorChange 20s infinite ease-in-out;
+  transition: background-color 0.8s ease-in-out; /* Smooth shift to grey */
+  overflow: hidden;
+  position: relative;
+}
+
+.global-bg-wrapper.dashboard-theme {
+  animation: none;
+  background-color: var(--bg-dashboard);
+}
