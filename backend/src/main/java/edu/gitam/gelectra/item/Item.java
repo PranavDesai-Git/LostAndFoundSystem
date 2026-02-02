@@ -3,6 +3,7 @@ package edu.gitam.gelectra.item;
 import edu.gitam.gelectra.user.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 public class Item {
@@ -12,6 +13,7 @@ public class Item {
 
     @ManyToOne
     @JoinColumn(name = "owner_id")
+    @JsonIgnoreProperties("items")
     private User owner;
     private String itemName;
     private String description;

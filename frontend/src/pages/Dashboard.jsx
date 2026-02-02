@@ -1,26 +1,35 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { useItems } from '../context/ItemContext';
+import Button from '../components/Button';
+import ReportForm from './ReportForm';
+import Dropdown from './Dropdown';
 import './Dashboard.css';
 
 const DetailsView = ({ item, onClose }) => {
   if (!item) return null;
 
+  // Safe formatting for CSS classes: handles nulls and different naming conventions
+  const formatStatusClass = (status) => {
+    if (!status) return 'unknown';
+    return status.toLowerCase().replace(/_/g, '-').replace(/, /g, '-');
+  };
+
   return (
     <motion.div
-      initial={{ x: '100%' }}
-      animate={{ x: 0 }}
-      exit={{ x: '100%' }}
+      initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
       className="details-overlay"
     >
-      <button className="close-btn" onClick={onClose}>BACK TO FEED [ESC]</button>
-
+      <Button text="BACK TO FEED [ESC]" variant="primary" onClick={onClose} />
       <div className="details-content">
         <div className="details-header">
-          <span className={`status-tag tag-${item.status.replace(/, /g, '-').toLowerCase()}`}>{item.status}</span>
+          <span className={`status-tag tag-${formatStatusClass(item.status)}`}>
+            {item.status?.replace(/_/g, ' ')}
+          </span>
           <span className="details-id">ITEM ID: {item.id}</span>
         </div>
-
         <h1 className="details-title">{item.name}</h1>
 
         {item.image && (
@@ -31,58 +40,39 @@ const DetailsView = ({ item, onClose }) => {
 
         <div className="details-section">
           <h3>DESCRIPTION</h3>
-          <p>{item.description}</p>
+          <p>{item.description || "No description provided."}</p>
         </div>
 
         <div className="details-grid">
           <div className="details-section">
             <h3>POSTER INFO</h3>
             <p><strong>Username:</strong> @{item.postedBy}</p>
-            <p><strong>User ID:</strong> UID-{item.id.split('-')[1]}</p>
+            {/* FIXED: Removed .split() which caused the white screen crash */}
+            <p><strong>Reference:</strong> DB-REF-{item.id}</p>
           </div>
           <div className="details-section">
             <h3>CONTACT</h3>
             <p><strong>Email:</strong> {item.postedBy}@university.edu</p>
-            <p><strong>Phone:</strong> +1 (555) 000-0000</p>
           </div>
         </div>
-
-        <button className="claim-btn">CLAIM THIS ITEM</button>
+        <Button text="CLAIM THIS ITEM" onClick={() => console.log("Claiming...", item.id)} />
       </div>
     </motion.div>
   );
 };
 
-const CustomDropdown = ({ label, options, selected, onSelect }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  return (
-    <div className="custom-dropdown-container">
-      <div className="dropdown-header" onClick={() => setIsOpen(!isOpen)}>
-        <span>{selected ? `${label}: ${selected}` : label}</span>
-        <span className={`arrow ${isOpen ? 'up' : ''}`}>▼</span>
-      </div>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.ul
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="dropdown-list"
-          >
-            {options.map((opt) => (
-              <li key={opt} onClick={() => { onSelect(opt); setIsOpen(false); }}>{opt}</li>
-            ))}
-          </motion.ul>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-
 const ItemCard = ({ item, viewMode, onClick }) => {
+  const formatStatusClass = (status) => {
+    if (!status) return 'unknown';
+    return status.toLowerCase().replace(/_/g, '-').replace(/, /g, '-');
+  };
+
   return (
     <motion.div
       layout
       onClick={() => onClick(item)}
       className={`item-card ${viewMode === 'list' ? 'list-view' : 'grid-view'}`}
+      style={{ cursor: 'pointer' }}
     >
       {item.image && (
         <div className="card-image-wrapper">
@@ -91,14 +81,15 @@ const ItemCard = ({ item, viewMode, onClick }) => {
       )}
       <div className="card-info">
         <div className="card-top">
-          <span className={`status-tag tag-${item.status.replace(/, /g, '-').toLowerCase()}`}>{item.status}</span>
+          <span className={`status-tag tag-${formatStatusClass(item.status)}`}>
+            {item.status?.replace(/_/g, ' ')}
+          </span>
           <span className="item-id">#{item.id}</span>
         </div>
         <h3 className="item-name">{item.name}</h3>
         <p className="item-desc">{item.description}</p>
         <div className="item-details">
-          <p><strong>OWNER:</strong> {item.owner || "UNIDENTIFIED"}</p>
-          <p><strong>POSTED BY:</strong> @{item.postedBy}</p>
+          <p><strong>BY:</strong> @{item.postedBy}</p>
         </div>
       </div>
     </motion.div>
@@ -106,6 +97,8 @@ const ItemCard = ({ item, viewMode, onClick }) => {
 };
 
 function Dashboard() {
+  const navigate = useNavigate();
+  const { items, loading, error } = useItems();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -113,12 +106,13 @@ function Dashboard() {
   const [tag, setTag] = useState('ALL TAGS');
   const [viewMode, setViewMode] = useState('grid');
   const [selectedItem, setSelectedItem] = useState(null);
+  const [isReporting, setIsReporting] = useState(false);
 
-  // ESC key listener
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         setSelectedItem(null);
+        setIsReporting(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -134,39 +128,57 @@ function Dashboard() {
     return () => clearTimeout(handler);
   }, [searchTerm, debouncedSearch]);
 
-  const items = [
-    { id: "LF-9021", name: "Airpods Pro", owner: "Sainash Sahoo", status: "LOST", description: "Left on the library table near the window.", location: "Main Library", image: "https://images.unsplash.com/photo-1588423770574-91993ca52ff6?q=80&w=500", postedBy: "pranavdesai", distance: 2, date: new Date('2026-01-28') },
-    { id: "LF-4420", name: "Water Bottle", owner: null, status: "FOUND, NOT TAKEN", description: "Blue Hydroflask found near the gym entrance.", location: "Student Gym", image: null, postedBy: "shriker_p", distance: 8, date: new Date('2026-02-01') },
-    { id: "LF-1102", name: "Car Keys", owner: "Pranav Desai", status: "FOUND", description: "Tesla keychain found in the parking lot.", location: "Zone C Parking", image: "https://images.unsplash.com/photo-1549194388-2469d59ec64c?q=80&w=500", postedBy: "gate_security", distance: 4, date: new Date('2026-01-15') }
-  ];
+  const filteredItems = items?.filter((item) => {
+    const lowerSearch = debouncedSearch.toLowerCase();
+    const posterMatch = lowerSearch.match(/poster:(\S+)/);
+    const cleanSearch = lowerSearch.replace(/poster:\S+/, '').trim();
 
-  const filteredItems = items.filter((item) => {
-    const cleanSearch = debouncedSearch.toLowerCase().replace(/poster:\S+/, '').replace(/distance:\d+(km)?/, '').trim();
-    const matchesText = !cleanSearch || item.name.toLowerCase().includes(cleanSearch);
+    const matchesText = !cleanSearch ||
+      item.name?.toLowerCase().includes(cleanSearch) ||
+      item.description?.toLowerCase().includes(cleanSearch);
+
+    // Exact match for tags (handling underscore from Java)
     const matchesTag = tag === 'ALL TAGS' || item.status === tag;
-    return matchesText && matchesTag;
-  });
+
+    const matchesPoster = !posterMatch || item.postedBy?.toLowerCase().includes(posterMatch[1]);
+
+    return matchesText && matchesTag && matchesPoster;
+  }) || [];
+
+  if (loading) return <div className="loading-state">SYNCING_DATABASE...</div>;
+  if (error) return <div className="error-state">{error}</div>;
 
   return (
     <div className="dashboard-wrapper">
       <header className="dash-header">
-        <div className="dash-logo">?!</div>
+        <div className="dash-logo" onClick={() => navigate('/home')} style={{cursor: 'pointer'}}>?!</div>
         <div className="header-right">
+          <div style={{ width: '220px' }}>
+            <Button text="+ REPORT ITEM" onClick={() => setIsReporting(true)} />
+          </div>
           <div className="view-toggle">
             <button className={viewMode === 'grid' ? 'active' : ''} onClick={() => setViewMode('grid')}>GRID</button>
             <button className={viewMode === 'list' ? 'active' : ''} onClick={() => setViewMode('list')}>LIST</button>
           </div>
-          <div className="user-profile">USER</div>
+          <div style={{ width: '120px' }}>
+            <Button text="USER" onClick={() => navigate('/profile')} />
+          </div>
         </div>
       </header>
 
       <main className="dash-content">
         <div className="filter-section">
           <div className={`search-container ${isSearching ? 'searching' : ''}`}>
-            <input type="text" className="search-bar" placeholder="SEARCH..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <input
+              type="text"
+              className="search-bar"
+              placeholder="SEARCH (poster:name)"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
-          <CustomDropdown label="SORT" options={['LATEST', 'OLDEST']} selected={sortBy} onSelect={setSortBy} />
-          <CustomDropdown label="TAGS" options={['ALL TAGS', 'LOST', 'FOUND']} selected={tag} onSelect={setTag} />
+          <Dropdown label="SORT" options={['LATEST', 'OLDEST']} selected={sortBy} onSelect={setSortBy} />
+          <Dropdown label="TAGS" options={['ALL TAGS', 'LOST', 'FOUND', 'FOUND_NOT_TAKEN']} selected={tag} onSelect={setTag} />
         </div>
 
         <div className={`item-grid ${viewMode === 'list' ? 'list-layout' : ''}`}>
@@ -179,9 +191,8 @@ function Dashboard() {
       </main>
 
       <AnimatePresence>
-        {selectedItem && (
-          <DetailsView item={selectedItem} onClose={() => setSelectedItem(null)} />
-        )}
+        {selectedItem && <DetailsView item={selectedItem} onClose={() => setSelectedItem(null)} />}
+        {isReporting && <ReportForm onClose={() => setIsReporting(false)} />}
       </AnimatePresence>
     </div>
   );
